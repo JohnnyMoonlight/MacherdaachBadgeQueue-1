@@ -6,6 +6,7 @@ from enum import Enum
 from datetime import datetime
 import statistics
 import sqlite3
+from services import reservationservice
 from config import broker, username, password
 
 port = 1883
@@ -139,8 +140,7 @@ def subscribe(client: mqtt_client):
                     place_number = json_loaded["place_number"] - 1
 
                     if (list_of_places[place_number].state != PlaceState.OCCUPIED):
-                        print("Place is not in state OCCUPIED - can not be released")
-
+                        print("Place is not in state OCCUPIED, but in state " + list_of_places[place_number].state + " - can not be released")
                     else:
                         processing_time = datetime.now(
                             tz=None) - list_of_places[place_number].start_time
@@ -173,34 +173,19 @@ def subscribe(client: mqtt_client):
                 for place in list_of_places:
                     if place.ticket_number == new_number:
                         print("New number " + str(new_number) +
-                              " already registered")
+                              " already working at place " + str(place.ticket_number))
                         return
                 if new_number in list_of_ticket_numbers:
                     print("New number " + str(new_number) +
                           "already in ticket number list")
                     return
-                for count, place in enumerate(list_of_places):
-                    # Search an empty place
-                    if (place.state == PlaceState.FREE):
-                        # Found one - register ticket number to place
-                        print("Register ticket: " +
-                              str(new_number) + " to free place")
 
-                        place.state = PlaceState.REGISTERED
-                        place.ticket_number = new_number
-                        list_of_labels_to_display_place_number[count].config(
-                            bg="green")
-                        list_of_labels_to_display_ticket_number[count].config(
-                            text=place.ticket_number)
-                        break
-                    if (place == list_of_places[-1]):
-                        # Found no vacant place - put number in queue
-                        print("New number " + str(new_number))
-                        list_of_ticket_numbers.append(new_number)
-                        update_queue()
+                reservationservice.reservePlaceForTicketNumber(new_number)
         except Exception as e:
             print(str(e))
             print("Something went wrong on mqtt reception")
+
+
 
     client.subscribe(topic_from_place)
     client.subscribe(topic_from_controller)
