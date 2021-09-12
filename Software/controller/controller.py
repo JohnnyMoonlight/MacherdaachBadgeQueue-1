@@ -4,8 +4,8 @@ import json
 from datetime import datetime
 import statistics
 from config import broker, username, password
-from model import Model
-from place import PlaceState
+from model.model import Model
+from model.place import PlaceState
 from view.view import View
 
 port = 1883
@@ -107,7 +107,7 @@ class Controller(object):
         for placeInList in self.model.list_of_places:
             if placeInList.ticket_number == new_number:
                 raise Exception("New number " + str(new_number) +
-                      " already registered")
+                                " already registered")
                 return
         if new_number in self.model.list_of_ticket_numbers:
             print("New number " + str(new_number) +
