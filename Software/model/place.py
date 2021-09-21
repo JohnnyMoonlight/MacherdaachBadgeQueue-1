@@ -9,7 +9,7 @@ class RegistrationError(Exception):
 
 
 class Place:
-    def __init__(self, state=PlaceState.FREE, ticket_number=0, start_time=None):
+    def __init__(self, state, ticket_number=0, start_time=None):
         self.state = state
         self.ticket_number = ticket_number  # registered ticket number
         self.start_time = start_time
